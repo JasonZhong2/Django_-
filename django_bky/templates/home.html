@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    {% load static %}
+
+    <link rel="stylesheet" href={% static "bootstrap-3.4.1-dist/css/bootstrap.min.css" %}>
+    <script src={% static "js/jquery-3.7.0.min.js" %}></script>
+    <script src={% static "bootstrap-3.4.1-dist/js/bootstrap.min.js" %}></script>
+
+</head>
+<body>
+<nav class="navbar navbar-default">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="#">博客园</a>
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav">
+        <li class="active"><a href="#">博客 <span class="sr-only">(current)</span></a></li>
+        <li><a href="#">文章</a></li>
+{#        <li class="dropdown">#}
+{#          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>#}
+{#          <ul class="dropdown-menu">#}
+{#            <li><a href="#">Action</a></li>#}
+{#            <li><a href="#">Another action</a></li>#}
+{#            <li><a href="#">Something else here</a></li>#}
+{#            <li role="separator" class="divider"></li>#}
+{#            <li><a href="#">Separated link</a></li>#}
+{#            <li role="separator" class="divider"></li>#}
+{#            <li><a href="#">One more separated link</a></li>#}
+{#          </ul>#}
+{#        </li>#}
+      </ul>
+{#      <form class="navbar-form navbar-left">#}
+{#        <div class="form-group">#}
+{#          <input type="text" class="form-control" placeholder="Search">#}
+{#        </div>#}
+{#        <button type="submit" class="btn btn-default">Submit</button>#}
+{#      </form>#}
+      <ul class="nav navbar-nav navbar-right">
+          {% if request.user.is_authenticated %}
+              <li><a href="#">{{ request.user.username }}</a></li>
+                <li class="dropdown">
+                  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">更多操作 <span class="caret"></span></a>
+                  <ul class="dropdown-menu">
+                    <li><a href="#" data-toggle="modal" data-target=".bs-example-modal-lg">修改密码</a></li>
+                    <li><a href="#">修改头像</a></li>
+                    <li><a href="#">后台管理</a></li>
+                    <li role="separator" class="divider"></li>
+                    <li><a href="/logout/">退出登录</a></li>
+                  </ul>
+                </li>
+          {% else %}
+                <li><a href="/register/">注册</a></li>
+                <li><a href="/login/">登录</a></li>
+          {% endif %}
+
+
+
+      </ul>
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container-fluid -->
+</nav>
+<!----------------------导航条结束------------------ -->
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-2"></div>
+        <!-- 中间文章展示 -->
+        <div class="col-md-8">
+            <ul class="media-list">
+                 {% for article in article_list %}
+                         <li class="media">
+                            <div class="media-left">
+                              <a href="#">
+                                <img class="media-object" src="/media/{{article.blog.user.avatar}}/" width="100px" height="100px" alt="...">
+                              </a>
+                            </div>
+                            <div class="media-body">
+                                <a href=""><h4 class="media-heading">{{ article.title }}</h4></a>
+                                {{article.desc}}
+                            </div>
+                            <div>
+                                <a href="/{{ article.blog.user.username }}/"><span>{{ article.blog.user.username }}</span></a>&nbsp;&nbsp;
+                                <span>{{ article.create_time|date:'Y-m-d' }}</span>
+                                <span class="glyphicon glyphicon-comment">评论{{ article.comment_num }}</span>
+                                <span class="glyphicon glyphicon-thumbs-up">点赞{{ article.up_num }}</span>
+                            </div>
+                        </li>
+                 {% endfor %}
+
+
+
+             </ul>
+        </div>
+
+        <div class="col-md-2"></div>
+
+    </div>
+
+</div>
+
+
+<!-- 修改密码的 模态框 弹出框-->
+
+<div class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <h1 class="text-center">修改密码</h1>
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <div class="form-group">
+                    <label for="">用户名：</label>
+                    <span>{{ request.user.username }}</span>
+                </div>
+                <div class="form-group">
+                    <label for="">原密码：</label>
+                    <input type="text" class="form-control" name="old_password" id="old_password">
+                     <span id="old_password_error" style="color: red"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="">新密码：</label>
+                   <input type="text" class="form-control" name="new_password" id="new_password">
+                </div>
+
+                <div class="form-group">
+                    <label for="">确认密码：</label>
+                    <input type="text" class="form-control" name="confirm_password" id="confirm_password">
+                    <span id="confirm_password_error" style="color: red"></span>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <button id="id_edit" type="button" class="btn btn-primary">提交</button>
+              </div>
+            </div>
+
+        </div>
+    </div>
+  </div>
+</div>
+
+<script>
+    $('#id_edit').click(function () {
+        var old_password = $('#old_password').val()
+        var new_password = $('#new_password').val()
+        var confirm_password =  $('#confirm_password').val()
+
+
+        $.ajax({
+            url:'/set_password/',
+            type:'post',
+            data:{
+                old_password:old_password,
+                new_password:new_password,
+                confirm_password:confirm_password,
+                csrfmiddlewaretoken:'{{ csrf_token }}'
+            },
+            success:function (res) {
+                if (res.code ===200){
+                    //修改成功 刷新页面
+                    location.reload()
+                }else if(res.code === 401){
+                    $('#confirm_password_error').text(res.msg)
+                }else if(res.code === 402){
+                    $('#old_password_error').text(res.msg)
+                }
+            }
+
+        })
+
+         //报错之后鼠标点击input的时候取消报错信息和样式
+        $('input').focus(function () {
+            $(this).next().text('').parent().removeClass('has-error')
+        })
+    })
+</script>
+
+</body>
+</html>

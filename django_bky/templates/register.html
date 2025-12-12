@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    {% load static %}
+
+    <link rel="stylesheet" href={% static "bootstrap-3.4.1-dist/css/bootstrap.min.css" %}>
+    <script src={% static "js/jquery-3.7.0.min.js" %}></script>
+    <script src={% static "bootstrap-3.4.1-dist/js/bootstrap.min.js" %}></script>
+
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-8 col-md-offset-2">
+            <h1 class="text-center">注册</h1>
+            <form  id="myform" novalidate> <!-- 使用ajax提交数据 -->
+                {% csrf_token %}
+                {% for form in form_obj %}
+                    <div class="form-group">
+                        <label for="">{{ form.label }}</label>
+                        {{ form }}
+                        <span style="color: red"></span>
+                    </div>
+                {% endfor %}
+                <div class="form-group">
+                    <label for="myfile">头像
+                        <img src="{% static 'images/default.png' %}" id="myimg"  width="150px" height="150px">
+                    </label>
+
+                    <input type="file" id="myfile" style="display: none" name="avatar">
+                </div>
+                <input type="button" id="id_btn" class="btn btn-primary pull-right" value="注册">
+            </form>
+        </div>
+
+    </div>
+</div>
+</body>
+<script>
+    //给input框绑定change事件 当input的值发生变化触发执行的函数
+    $('#myfile').change(function () {
+        //通过文件（阅读器）列表对象获取上传的文件数据
+        let fileReadObj = new FileReader()
+        //获取input上传文件对象
+        //this 可以直接返回当前正在操作的标签
+        let fileObj = $(this)[0].files[0]
+        //通过文件（阅读器）列表读取文件对象
+        fileReadObj.readAsDataURL(fileObj)
+        //等待文件文件（阅读器）读取完毕之后再去修改img的src值
+        fileReadObj.onload = function () {
+            $('#myimg').attr('src',fileReadObj.result)
+        }
+    })
+
+    //给注册按钮绑定点击事件
+    $('#id_btn').click(function () {
+         //创建FormData对象
+        let formDataObj = new FormData()
+        //先添加普通 键值对 的数据
+        //因为是form组件渲染出来的内容的时候 我们没办法直接拿到name
+        // 其实在渲染出来的时候页面当中我通过查看源代码的时候发现是由name属性的
+        //之所以我就可以使用from中的serializeArray
+        //serializeArray 可以拿到表单元素的值的 序列化成一个由对象数组组成
+        //'username':'zhangsan' 0
+        //'password':'123456' 1
+        //.....
+        //处理结构化数据 拿到结构化数据之后就可以通过ajax的方式请求后端
+        $.each($('#myform').serializeArray(),function (index,obj) {
+            formDataObj.append(obj.name,obj.value)
+        })
+        //构建文件获取方式
+        let fileInput = $('#myfile')[0]
+        if(fileInput.files.length >0){
+            formDataObj.append('avatar',fileInput.files[0])
+        }
+
+        //发送请求
+        $.ajax({
+             url:'',
+             type:'post',
+             data:formDataObj,
+             contentType:false,//不需要进行编码
+             processData:false,//让浏览器不要处理数据
+             success:function (res){
+                if(res.code ===200){
+                    //注册成功,跳转到登录页面  location.href相当于前端的重定向
+                    location.href = res.url
+                }else{
+                    //输出错误信息
+                    $.each(res.msg,function (index,obj) {
+                        let target_id = '#id_'+index  //id_username
+                        $(target_id)
+                            .next() //定位到后面的span
+                            .text(obj[0]) //显示错误信息
+                    })
+                }
+             }
+        })
+
+         //报错之后鼠标点击input的时候取消报错信息和样式
+        $('input').focus(function () {
+            $(this).next().text('').parent().removeClass('has-error')
+        })
+
+    })
+
+
+</script>
+
+</html>

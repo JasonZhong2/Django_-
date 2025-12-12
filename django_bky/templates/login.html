@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    {% load static %}
+
+    <link rel="stylesheet" href={% static "bootstrap-3.4.1-dist/css/bootstrap.min.css" %}>
+    <script src={% static "js/jquery-3.7.0.min.js" %}></script>
+    <script src={% static "bootstrap-3.4.1-dist/js/bootstrap.min.js" %}></script>
+
+</head>
+<body>
+<div class="row">
+    <div class="col-md-8 col-md-offset-2">
+        <h1 class="text-center">登录</h1>
+        <div class="form-group">
+            <label for="">用户名：</label>
+            <input type="text" id="username" name="username" class="form-control">
+        </div>
+        <div class="form-group">
+            <label for="">密码：</label>
+            <input type="password" id="password" name="password" class="form-control">
+        </div>
+        <div class="form-group">
+            <label for="">验证码：</label>
+            <div class="row">
+                <div class="col-md-6">
+                    <input type="text" class="form-control" name="code" id="code">
+                </div>
+                 <div class="col-md-6">
+                     <img src="/get_code/" alt="" id="captchaImage" >
+                </div>
+            </div>
+        </div>
+        <p><span id="error" style="color: red"></span></p>
+        <input type="button" id="login_btn" class="btn btn-success" value="提交">
+
+    </div>
+</div>
+</body>
+<script>
+    //点击 验证码
+    $('#captchaImage').click(function () {
+        //加一个时间戳 为了就是让浏览器知道每次换的内容时间不一样
+        // 现在的问题就是时间一样的时候 系统不给你发送请求
+        const timestamp = new Date().getTime()
+        $(this).attr('src','/get_code/?'+timestamp)
+    })
+
+    $('#login_btn').click(function () {
+        var username = $('#username').val()
+        var password = $('#password').val()
+        var code = $('#code').val()
+
+        $.ajax({
+            url:'',
+            type:'post',
+            data:{
+                username:username,
+                password:password,
+                code:code,
+                csrfmiddlewaretoken:'{{ csrf_token }}'
+            },
+            success:function (res) {
+                if(res.code === 200){
+                    //重定向跳转到首页
+                    location.href = res.url
+                }else{
+                    $('#error').text(res.msg)
+                }
+            }
+        })
+
+    })
+
+</script>
+</html>
